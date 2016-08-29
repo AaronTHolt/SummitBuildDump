@@ -1,0 +1,1564 @@
+Modules_2016a
+
+QT 5.6.0 had no config.log. Was installed with system compiler and no modules loaded:
+./configure --prefix=/curc/sw/qt/5.6.0/
+make
+make install
+
+QT 4.8.5
+./configure    --prefix=/curc/sw/qt/4.8.5   -opensource   -confirm-license   -nomake   examples   -nomake   tests   -qt-zlib   -qt-libpng   -qt-libjpeg   -qt-freetype   -optimized-qmake   -no-dbus
+
+
+Paraview is a binary and was just moved to the correct directory.
+
+
+
+
+Foreman:
+vi /etc/puppet/environments/development/modules/summit/manifests/profiles/packages.pp
+
+  package { 'pkg': ensure => installed, }
+
+
+
+Fixing IMPI with GCC:
+-Need to make new bindings if GCC is new and intel hasn't added
+-Modify script and make bindings (should be in notebook too):
+
+ 1026  cd intel/16.0.3/impi/5.1.3.210/
+ 1027  ls
+ 1028  cd include64/
+ 1029  ls
+ 1030  cd gfortran/
+ 1031  ls
+ 1032  cd 5.1.0/
+ 1033  ls
+ 1034  cd ..
+ 1035  ls
+ 1036  cd ..
+ 1037  ls
+ 1038  cd ..
+ 1039  ls
+ 1040  cd binding/
+ 1041  ls
+ 1042  tar -xf intel-mpi-binding-kit.tar.gz
+ 1043  cd intel-mpi-binding-kit.tar.gz
+ 1044  ls
+ 1045  vi README-intel-mpi-binding-kit.txt
+ 1046  ml av
+ 1047  ml gcc
+ 1048  cd c
+ 1049  ml impi
+ 1050  make MPI_INST=${I_MPI_ROOT} all64
+ 1051  ls
+ 1052  less Makefile
+ 1053  make MPI_INST=${I_MPI_ROOT} all
+ 1054  rm intel64/bin/mpipgc
+ 1055  cd ..
+ 1056  pwd
+ 1057  ls
+ 1058  cd f90/
+ 1059  ls
+ 1060  less Makefile
+ 1061  env | grep f90
+ 1062  which f90
+ 1063  echo $F90
+ 1064  export F90=gfortran
+ 1065  make MPI_INST=${I_MPI_ROOT} all
+ 1066  ls
+ 1067  ls intel64/
+ 1068  ls intel64/include/
+ 1069  ls intel64/include/pgf/
+ 1070  mkdir ../include64/gfortran/6.1.0
+ 1071  pwd
+ 1072  mkdir ../../include64/gfortran/6.1.0
+ 1073  cp -R intel64/include/pgf/* ../../include64/gfortran/6.1.0
+
+
+
+ #fftw intel impi
+ ./configure \
+   --prefix=/curc/sw/fftw/3.3.4/intel/16.0.3/impi/5.1.3.210 \
+   --enable-mpi \
+   --enable-openmp \
+   --enable-shared \
+   --enable-threads \
+   --enable-avx
+
+
+
+# MKL FFTW binding bs:
+Users who want fftw will need to link with -lmkl and -l(appropriate .a file) located in /curc/sw/intel/16.0.3/mkl/lib/intel64
+
+
+# config R/3.3
+./configure  \
+  --prefix=/curc/sw/R/3.3.0/intel/16.0.3 \
+  --with-recommended-packages \
+  CFLAGS=-I/curc/sw/intel/16.0.3/include:/curc/sw/intel/16.0.3/mkl/include \
+  LDFLAGS=-L/curc/sw/intel/16.0.3/lib:/curc/sw/intel/16.0.3/lib/intel64:/curc/sw/intel/16.0.3/mkl/lib/intel64 \
+  LD=/curc/tools/src/ld_wrapper.sh
+
+# config ATLAS
+ml purge
+ml gcc/6.1.0
+../ATLAS/configure --prefix=/curc/sw/atlas/3.10.2/gcc/6.1.0 \
+ --with-netlib-lapack-tarfile=/curc/tools/src/atlas/atlas-3.10.2/lapack-3.6.0.tgz \
+ --shared
+
+
+#hdf5 intel
+module purge
+module load intel/16.0.3
+module load zlib/1.2.8
+module load szip/2.1
+ ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/intel/16.0.3 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 --with-default-plugindir=/curc/sw/hdf5/1.10.0/intel/16.0.3/lib/plugin --with-zlib=/curc/sw/zlib/1.2.8/intel/16.0.3 LD=/curc/tools/src/ld_wrapper.sh
+
+
+#hdf5 intel impi
+ml purge
+ml intel/16.0.3 impi/5.1.3.210 zlib/1.2.8 szip/2.1
+ ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 --with-default-plugindir=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+
+ ###/curc/sw/modules/mdep/impi/5.1.3.210/intel/16.0.3/hdf5/1.10.0.lua
+
+#hdf5 intel openmpi
+ml purge
+ml intel/16.0.3 openmpi/1.10.2 zlib/1.2.8 szip/2.1
+ ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 --with-default-plugindir=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+###/curc/sw/modules/mdep/openmpi/1.10.2/intel/16.0.3/hdf5/1.10.0.lua
+
+
+#hdf5 gcc impi
+ ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/gcc/6.1.0 --with-default-plugindir=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+PATH: /curc/sw/intel/16.0.3/impi/5.1.3.210/bin64
+PATH: /curc/sw/gcc/6.1.0/bin
+PATH: /usr/local/bin
+PATH: /bin
+PATH: /usr/bin
+PATH: /usr/local/sbin
+PATH: /usr/sbin
+
+ #hdf5 pgi openmpi
+ml purge
+ml pgi/16.5 openmpi/1.10.2 zlib/1.2.8 szip/2.1
+../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/pgi/16.5 --with-default-plugindir=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+
+###########openmpi intel
+../openmpi-1.10.2/configure --prefix=/curc/sw/openmpi/1.10.2/intel/16.0.3 --enable-sensors --enable-wrapper-rpath --enable-static --with-threads=posix --enable-mpi-thread-multiple --enable-mpi-ext=all --with-verbs=/usr --with-slurm --with-pmi=/usr --with-psm2=/usr --with-cuda=/curc/sw/cuda/7.5.18 --enable-oshmem
+
+
+###########perl 5.22
+ml purge
+./Configure -des -Dprefix=$HOME/localperl
+make test
+make install
+
+
+#tcl (need this before tk)
+./configure --prefix=/curc/sw/tcltk/8.6.5 --disable-shared --enable-threads --enable-64bits
+#tk
+./configure --prefix=/curc/sw/tcltk/8.6.5 --disable-shared --enable-threads --enable-64bits
+
+
+###### gdal 2.1 ###############
+module purge
+module load gcc/6.1.0
+module load geos/3.5.0
+module load jasper/1.900.1
+module load szip/2.1
+module load hdf5/1.10.0
+module load netcdf/4.4.0
+./configure  \
+  --prefix=/curc/sw/gdal/2.1.0/gcc/6.1.0 \
+  --with-png=internal \
+  --with-jpeg=internal \
+  --with-geotiff=internal \
+  --with-libtiff=internal \
+  --with-gif=internal \
+  --with-hdf5=${CURC_HDF5_ROOT} \
+  --with-netcdf=${CURC_NETCDF_ROOT} \
+  --with-curl=/usr/bin \
+  --with-xml2=/usr/bin \
+  --with-pcraster=internal \
+  --with-jasper=${CURC_JASPER_ROOT} \
+  --with-geos=yes
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+
+module purge
+module load intel/16.0.3
+module load geos/3.5.0
+module load jasper/1.900.1
+module load szip/2.1
+module load hdf5/1.10.0
+module load netcdf/4.4.0
+./configure  \
+  --prefix=/curc/sw/gdal/2.1.0/intel/16.0.3 \
+  --with-png=internal \
+  --with-jpeg=internal \
+  --with-geotiff=internal \
+  --with-libtiff=internal \
+  --with-gif=internal \
+  --with-hdf5=${CURC_HDF5_ROOT} \
+  --with-netcdf=${CURC_NETCDF_ROOT} \
+  --with-curl=/usr/bin \
+  --with-xml2=/usr/bin \
+  --with-pcraster=internal \
+  --with-jasper=${CURC_JASPER_ROOT} \
+  --with-geos=yes
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+
+
+#armadillo 7.100.3 (gcc)
+ml purge
+ml gcc/6.1.0
+ml mkl/11.3.3
+ml cmake/3.5.2
+cmake .
+make
+make install DESTDIR=/curc/sw/armadillo/7.100.3/gcc/6.1.0/
+
+
+--
+
+-- Load the package defaults
+local pkg = loadPkgDefaults(1)
+setPkgInfo(pkg)
+
+-- Set the paths
+prepend_path("PATH", pathJoin(pkg.prefix, "/usr/bin"))
+prepend_path("LD_LIBRARY_PATH", pathJoin(pkg.prefix, "/usr/lib64"))
+
+setenv("CURC_ARMADILLO_INC", pathJoin(pkg.prefix, "/usr/include"))
+append_path("CURC_ARMADILLO_INC", pathJoin(pkg.prefix, "/usr/include/armadillo_bits"))
+setenv("CURC_ARMADILLO_LIB", pathJoin(pkg.prefix, "/usr/lib64"))
+
+
+--
+-- Package defaults
+
+local pkg = {}
+
+pkg.display_name = "armadillo"
+pkg.category     = "development"
+pkg.keywords     = ""
+pkg.url          = "http://arma.sourceforge.net/"
+pkg.license      = "MPL 2.0"
+pkg.description  = "Armadillo"
+pkg.help         = [[
+Armadillo is a high quality linear algebra library (matrix maths) for the C++ language, aiming towards a good balance between speed and ease of use.
+]]
+
+return pkg
+
+
+
+
+############# netcdf intel ############
+###### Try 1 (works but is sloppy!) ######
+module purge
+
+export LDFLAGS="-L/curc/sw/hdf5/1.10.0/intel/16.0.3/lib -L/curc/sw/zlib/1.2.8/intel/16.0.3/lib -L/curc/sw/szip/2.1/intel/16.0.3/lib"
+export LD_LIBRARY_PATH="-L/curc/sw/hdf5/1.10.0/intel/16.0.3/lib -L/curc/sw/zlib/1.2.8/intel/16.0.3/lib -L/curc/sw/szip/2.1/intel/16.0.3/lib"
+export CFLAGS="-I/curc/sw/hdf5/1.10.0/intel/16.0.3/include -I/curc/sw/zlib/1.2.8/intel/16.0.3/include -I/curc/sw/szip/2.1/intel/16.0.3/include"
+export CPPFLAGS="-I/curc/sw/hdf5/1.10.0/intel/16.0.3/include -I/curc/sw/zlib/1.2.8/intel/16.0.3/include -I/curc/sw/szip/2.1/intel/16.0.3/include"
+
+module load intel/16.0.3
+module load szip/2.1
+module load hdf5/1.10.0
+module load zlib/1.2.8
+
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/intel/16.0.3 \
+  --enable-mmap
+
+###### Try 2, add to configure instead of env vars so its logged better (failed...) ###
+## checking for library containing H5Fflush  ...errors out, ld_library path gets messed up...
+
+module purge
+module load intel/16.0.3
+module load szip/2.1
+module load hdf5/1.10.0
+module load zlib/1.2.8
+
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/intel/16.0.3 \
+  --enable-mmap \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/intel/16.0.3/lib -L/curc/sw/zlib/1.2.8/intel/16.0.3/lib -L/curc/sw/szip/2.1/intel/16.0.3/lib -L/curc/sw/intel/16.0.3/compilers_and_libraries_2016.3.210/linux/compiler/lib/intel64" \
+  LD_LIBRARY_PATH="-L/curc/sw/hdf5/1.10.0/intel/16.0.3/lib -L/curc/sw/zlib/1.2.8/intel/16.0.3/lib -L/curc/sw/szip/2.1/intel/16.0.3/lib -L/curc/sw/intel/16.0.3/compilers_and_libraries_2016.3.210/linux/compiler/lib/intel64" \
+  CFLAGS="-I/curc/sw/hdf5/1.10.0/intel/16.0.3/include -I/curc/sw/zlib/1.2.8/intel/16.0.3/include -I/curc/sw/szip/2.1/intel/16.0.3/include" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/intel/16.0.3/include -I/curc/sw/zlib/1.2.8/intel/16.0.3/include -I/curc/sw/szip/2.1/intel/16.0.3/include"
+
+###### Try 3, remove LD_LIBRARY_PATH stuff as it messes it up, only add LDFLAGS ######
+### Couldn't find H5Fflush:
+### --with-hdf5 isn't and option, use LDFLAGS and CPPFLAGS instead
+
+module purge
+module load intel/16.0.3
+module load szip/2.1
+module load hdf5/1.10.0
+module load zlib/1.2.8
+
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/intel/16.0.3 \
+  --enable-mmap \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/intel/16.0.3/lib" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/intel/16.0.3/include"
+
+# Works!!!
+
+### pgi netcdf/4.4.0 ###
+module purge
+module load pgi/16.5
+module load szip/2.1
+module load hdf5/1.10.0
+module load zlib/1.2.8
+
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/pgi/16.5 \
+  --enable-mmap \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/pgi/16.5/lib" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/pgi/16.5/include"
+
+
+
+###### hdf5-eos #####
+
+./configure
+--prefix=/curc/tools/x86_64/rh6/software/hdfeos5/1.15/intel/15.0.2
+CC=/curc/tools/x86_64/rh6/software/hdf5/1.8.15/intel/15.0.2/bin/h5cc
+-Df2cFortran
+--with-szlib=/curc/tools/x86_64/rh6/software/szip/2.1/intel/15.0.2
+
+
+
+
+############## PGI is the worst #################
+
+
+#### pgi can't compile
+ld -lnuma --verbose
+...
+ld: cannot find -lnuma
+
+ln -s /usr/lib64/libnuma.so.1 /usr/lib64/libnuma.so
+
+
+####pgi overloaded weirdness
+https://www.pgroup.com/userforum/viewtopic.php?t=2211&view=previous&sid=7f64c30eb663819b8449a3d9dcbcf160
+CXXFLAGS=--no_using_std
+
+
+####pgi gsl/2.1
+multiple definition of.....
+should be fixed by adding -z muldefs to LDFLAGS, but it doesn't. Tried adding in makefile, in configure...
+also tried -Wl, -z muldefs -Wl ....
+
+
+######### Python package list #################
+pip
+basemap
+cython
+h5py
+ipython
+matplotlib
+mpi4py
+mysql-python
+netcdf4-python
+virtualenv
+nose
+numexpr
+numpy
+pandas
+patsy
+pil
+pytest
+pygrib
+pyproj
+pyngl
+pynio
+PyQt4
+PyQt5
+pyside
+pyzmq
+scipy
+scikit-learn
+statsmodels
+sympy
+yt
+click
+pyslurm
+Sphinx
+terminado
+traitlets
+tornado
+nbformat
+nbconvert
+jupyter-core
+jupyter-client
+jinja2
+ipython-genutils
+ipykernel
+notebook
+netCDF4
+
+
+results 2.7.11:
+
+FAIL::
+pyslurm
+pyngl
+pynio
+pygrib
+pil
+mysql-python
+basemap
+
+
+
+
+##### hdfeos5 intel #####
+./configure --prefix=/curc/sw/hdfeos5/1.15/intel/16.0.3 CC='/curc/sw/hdf5/1.10.0/intel/16.0.3/bin/h5cc -Df2cFortran' --with-szlib=/curc/sw/szip/2.1/intel/16.0.3
+
+##### hdfeos5 gcc #####
+./configure --prefix=/curc/sw/hdfeos5/1.15/gcc/6.1.0 CC=/curc/sw/hdf5/1.10.0/gcc/6.1.0/bin/h5cc --with-szlib=/curc/sw/szip/2.1/gcc/6.1.0 --with-zlib=/curc/sw/zlib/1.2.8/gcc/6.1.0
+
+##### hdfeos5 pgi #####
+./configure --prefix=/curc/sw/hdfeos5/1.15/pgi/16.5 CC=/curc/sw/hdf5/1.10.0/pgi/16.5/bin/h5cc --with-szlib=/curc/sw/szip/2.1/pgi/16.5 --with-zlib=/curc/sw/zlib/1.2.8/pgi/16.5
+
+
+in src/GDapi.c:
+92: static herr_t HE5_GDupdatedim(int gridhID,  char *dimname, hsize_t dim);
+7508: static herr_t HE5_GDupdatedim(hid_t gridID,  char *dimname, hsize_t dim)
+changing to hid_t
+
+   85: static int HE5_GDfldnameinfo(hid_t gridID, const char *fieldname, char *fldactualname);
+19992: static int HE5_GDfldnameinfo(int gridID, const char *fieldname, char *actualname)
+changing to hid_t
+
+
+17266: hid_t HE5_GDdeftimeperiod(hid_t gridID, hid_t periodID, double starttime, double stoptime)
+
+GDapi.c:17268:1: error: conflicting types for 'HE5_GDdeftimeperiod'
+ HE5_GDdeftimeperiod(hid_t gridID, hid_t periodID, double starttime, double stoptime)
+ ^~~~~~~~~~~~~~~~~~~
+In file included from GDapi.c:14:0:
+../include/HE5_HdfEosDef.h:791:10: note: previous declaration of 'HE5_GDdeftimeperiod' was here
+ herr_t   HE5_GDdeftimeperiod(hid_t gridID, hid_t periodID, double starttime, double stoptime);
+
+
+herr_t   HE5_GDdeftimeperiod(hid_t gridID, hid_t periodID, double starttime, double stoptime);
+
+
+
+
+########## ANTLR 2.7.7 ############
+Added the following to lib/cpp/antlr/CharScanner.hpp to get PGI and Intel to compile:
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+########## FFTW 3.3.4 ##################
+curcb is shitting itself again: here are the configs
+
+ml purge
+ml gcc
+./configure --prefix=/curc/sw/fftw/3.3.4/gcc/6.1.0/ --enable-shared --enable-openmp --enable-threads --enable-debug
+make -j12
+ml purge
+ml gcc
+./configure --prefix=/curc/sw/fftw/3.3.4/gcc/6.1.0/ --enable-shared --enable-openmp --enable-threads --enable-debug --enable-single
+
+ml purge
+ml intel
+./configure --prefix=/curc/sw/fftw/3.3.4/intel/16.0.3/ --enable-shared --enable-openmp --enable-threads --enable-debug
+ml purge
+ml intel
+./configure --prefix=/curc/sw/fftw/3.3.4/intel/16.0.3/ --enable-shared --enable-openmp --enable-threads --enable-debug --enable-single
+
+ml purge
+ml pgi
+./configure --prefix=/curc/sw/fftw/3.3.4/pgi/16.5/ --enable-shared --enable-openmp --enable-threads --enable-debug
+ml purge
+ml pgi
+./configure --prefix=/curc/sw/fftw/3.3.4/pgi/16.5/ --enable-shared --enable-openmp --enable-threads --enable-debug --enable-single
+
+
+
+> Hi,
+>
+> I'm trying to compile a single and double precision version of fftw on
+> rhel7 using gcc6.1. I've tried adding the "--enable-type-prefix" seen
+> in your documentation here: http://www.fftw.org/fftw2_doc/fftw_6.html .
+> However I get a configure error:
+> "configure: WARNING: unrecognized options: --enable-type-prefix".
+> After installing the headers and libraries aren't prefixed. Does the
+> "--enable-type-prefix" options still exist?
+>
+> For now I've just made separate install locations. It would be more
+> convenient to have them in one place!
+
+--enable-type-prefix was used in fftw2 (last released in 1999).  fftw3
+does not need it: double precision calls everything fftw_* and single
+
+
+Install them both at same place. Once with --enable-single and once without. It makes seperate libs/includes/binaries for them.
+
+
+####### MPI FFTW CONFIGS ################
+Again curcb sucks the big one...
+
+./configure --prefix=/curc/sw/fftw/3.3.4/openmpi/1.10.2/gcc/6.1.0/ --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi
+./configure --prefix=/curc/sw/fftw/3.3.4/openmpi/1.10.2/gcc/6.1.0/ --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi --enable-single
+
+
+ml purge
+ml gcc impi
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/impi/5.1.3.210/gcc/6.1.0/ --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi
+make -j14
+make install
+curcb -i
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/impi/5.1.3.210/gcc/6.1.0/ --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi --enable-single
+make -j14
+make install
+curcb -i
+
+
+ml purge
+ml intel impi
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/impi/5.1.3.210/intel/16.0.3 --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi
+make -j14
+make install
+curcb -i
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/impi/5.1.3.210/intel/16.0.3 --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi --enable-single
+make -j14
+make install
+curcb -i
+curcb
+
+ml purge
+ml intel openmpi
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/openmpi/1.10.2/intel/16.0.3 --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi
+make -j14
+make install
+curcb -i
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/openmpi/1.10.2/intel/16.0.3 --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi --enable-single
+make -j14
+make install
+curcb -i
+curcb
+
+
+ml purge
+ml pgi openmpi
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/openmpi/1.10.2/pgi/16.5 --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi
+make -j14
+make install
+curcb -i
+make clean
+./configure --prefix=/curc/sw/fftw/3.3.4/openmpi/1.10.2/pgi/16.5 --enable-shared --enable-openmp --enable-threads --enable-debug --enable-mpi --enable-single
+make -j14
+make install
+curcb -i
+curcb
+
+
+
+
+
+
+######## grib api 1.15 ############
+OLD INSTALL
+module purge
+module load gcc/5.1.0
+module load szip/2.1
+module load hdf5/1.8.15
+module load jasper/1.900.1
+module load netcdf/4.3.3.1
+./configure  \
+  --prefix=/curc/tools/x86_64/rh6/software/grib_api/1.13.1/gcc/5.1.0 \
+  --enable-align-memory \
+  --enable-vector \
+  --enable-memory-management \
+  --enable-omp-packing \
+  --with-netcdf=${CURC_NETCDF_ROOT} \
+  --with-jasper=${CURC_JASPER_ROOT} \
+  --with-png-support
+
+
+NEW install recommends cmake:
+ml purge
+ml intel/16.0.3
+ml cmake/3.5.2
+ml szip/2.1
+ml jasper/1.900.1
+ml hdf5/1.10.0
+ml netcdf/4.4.0
+ml git/2.8.3
+ml zlib/1.2.8
+cmake ../grib_api-1.15.0 \
+-DCMAKE_INSTALL_PREFIX=/curc/sw/grib_api/1.15.0/intel/16.0.3 \
+-DENABLE_JPG=ON \
+-DENABLE_PNG=ON \
+-DENABLE_NETCDF=ON \
+-DENABLE_FORTRAN=ON \
+-DENABLE_MEMORY_MANAGEMENT=ON \
+-DENABLE_ALIGN_MEMORY=ON \
+-DENABLE_GRIB_THREADS=ON
+make
+ctest (fails 80% of tests)
+make install
+
+
+ml purge
+ml intel/16.0.3
+ml cmake/3.5.2
+ml szip/2.1
+ml jasper/1.900.1
+ml hdf5/1.10.0
+ml netcdf/4.4.0
+ml git/2.8.3
+ml zlib/1.2.8
+./configure  \
+  --prefix=/curc/sw/grib_api/1.15.0/intel/16.0.3 \
+  --enable-align-memory \
+  --enable-vector \
+  --enable-memory-management \
+  --enable-omp-packing \
+  --with-netcdf=${CURC_NETCDF_ROOT} \
+  --with-jasper=${CURC_JASPER_ROOT} \
+  --with-png-support
+
+here's why tests fail: https://software.ecmwf.int/wiki/display/GRIB/GRIB+API+Frequently+Asked+Questions+FAQ
+Building on High Performance Computer systems
+Some HPC batch systems have a different hardware architecture for their login (or frontend node) to the batch node, but the frontend compilation system is targeted at the batch nodes. This is known as cross-compilation. If this is the case you may see failures in the 'make check' stage because the checks, although compiled for the backend batch nodes, are being run on the frontend nodes and therefore may not work correctly. If this is the case on your system, we recommend using a batch job to do the 'configure; make; make check; make install' steps.
+In some cases, the batch system cannot be used for compilation at all. In this case, you have to compile on the frontend but without extra flags 'configure' will assume the build is for the frontend. You can make use of the --host option to ensure the build is correct for the architecture of the batch system. Again though, the tests will fail, a small serial batch job is recommended to make sure grib_api is installed correctly.
+Note if you plan on using the grib_api software in your own software that runs on the frontend nodes you will need to install grib_api twice; one for the batch system and again for the frontend system.
+If you have any questions installing grib_api in this type of environment, please contact: openifs-support@ecmwf.int for assistance.
+
+
+ml purge
+ml gcc/6.1.0
+ml cmake/3.5.2
+ml szip/2.1
+ml jasper/1.900.1
+ml hdf5/1.10.0
+ml netcdf/4.4.0
+ml git/2.8.3
+ml zlib/1.2.8
+make clean
+./configure  \
+  --prefix=/curc/sw/grib_api/1.15.0/gcc/6.1.0 \
+  --enable-align-memory \
+  --enable-vector \
+  --enable-memory-management \
+  --enable-omp-packing \
+  --with-netcdf=${CURC_NETCDF_ROOT} \
+  --with-jasper=${CURC_JASPER_ROOT} \
+  --with-png-support
+make -j14
+make install
+curcb -i
+curcb
+
+ml purge
+ml pgi/16.5
+ml cmake/3.5.2
+ml szip/2.1
+ml jasper/1.900.1
+ml hdf5/1.10.0
+ml netcdf/4.4.0
+ml git/2.8.3
+ml zlib/1.2.8
+make clean
+./configure  \
+  --prefix=/curc/sw/grib_api/1.15.0/pgi/16.5 \
+  --enable-align-memory \
+  --enable-vector \
+  --enable-memory-management \
+  --enable-omp-packing \
+  --with-netcdf=${CURC_NETCDF_ROOT} \
+  --with-jasper=${CURC_JASPER_ROOT} \
+  --with-png-support
+make -j14
+make install
+curcb -i
+curcb
+
+
+#############################################################
+II.2.1. C Binding
+
+To use the Intel(R) MPI Library C binding with the PGI* compiler,
+do the following steps:
+
+1. Make sure that the PGI* C compiler (pgcc) is in your PATH.
+
+2. Go to the directory c
+
+3. Run the command
+
+   # make MPI_INST=<MPI_path> CC=<C_compiler> NAME=<name> \
+     [ARCH=<arch>]
+
+   with
+
+   <MPI_path>        - installation directory of the Intel(R) MPI Library
+   <C_compiler>      - compiler to be used
+   <name>            - base name for the compiler script
+   <arch>            - set `intel64` or `mic` architecture, `intel64` is used by
+                       default
+
+4. Copy the resulting <arch> directory to the Intel(R) MPI Library installation
+   directory.
+
+
+II.2.2. C++ Binding
+
+To create the Intel(R) MPI Library C++ binding library using the
+PGI* C++ compiler, do the following steps:
+
+1. Make sure that the PGI* C++ compiler (pgCC) is in your PATH.
+
+2. Go to the directory cxx
+
+3. Run the command
+
+   # make MPI_INST=<MPI_path> CXX=<C++_compiler> NAME=<name> \
+     [ARCH=<arch>] [MIC=<mic option>]
+
+   with
+
+   <MPI_path>        - installation directory of the Intel(R) MPI Library
+   <C++_compiler>    - compiler to be used
+   <name>            - base name for the libraries and compiler script
+   <arch>            - set `intel64` or `mic` architecture, `intel64` is used by
+                       default
+   <mic option>      - compiler option to generate code for Intel(R) MIC
+                       Architecture. Availalbe only when ARCH=mic is set, `-mmic`
+                       is used by default in such case
+
+4. Copy the resulting <arch> directory to the Intel(R) MPI Library installation
+   directory.
+
+
+II.2.3. Fortran 77 Binding
+
+To use the Intel(R) MPI Library Fortran 77 binding with the PGI*
+compiler, do the following steps:
+
+1. Make sure that the PGI* Fortran 77 compiler (pgf77) is in your PATH.
+
+2. Go to the directory f77
+
+3. Run the command
+
+   # make MPI_INST=<MPI_path> F77=<f77_compiler> NAME=<name> \
+     [ARCH=<arch>]
+
+   with
+
+   <MPI_path>        - installation directory of the Intel(R) MPI Library
+   <f77_compiler>    - compiler to be used
+   <name>            - base name for the compiler script
+   <arch>            - set `intel64` or `mic` architecture, `intel64` is used by
+                       default
+
+4. Copy the resulting <arch> directory to the Intel(R) MPI Library installation
+   directory.
+
+
+II.2.4. Fortran 90 Binding
+
+To create the Intel(R) MPI Library Fortran 95 binding library using
+the PGI* Fortran 90 compiler, do the following steps:
+
+1. Make sure that the PGI* Fortran 90 compiler (pgf90) is in your PATH
+
+2. Go to the directory f90
+
+3. Run the command
+
+   # make MPI_INST=<MPI_path> F90=<f90_compiler> NAME=<name> \
+     [ILP64=<ILP64 options>] [ARCH=<arch>] [MIC=<mic option>]
+
+   with
+
+   <MPI_path>        - installation directory of the Intel(R) MPI Library
+   <f90_compiler>    - compiler to be used
+   <name>            - base name for the libraries and compiler script
+   <ILP64 options>   - compiler option to specify 64 bits size for integer  and
+                       logical variables
+   <arch>            - set `intel64` or `mic` architecture, `intel64` is used by
+                       default
+   <mic option>      - compiler option to generate code for Intel(R) MIC
+                       Architecture. Availalbe only when ARCH=mic is set, `-mmic`
+                       is used by default in such case
+
+4. Copy the resulting <arch> directory to the Intel(R) MPI Library installation
+   directory.
+
+   NOTE: Don't remove existing libraries libmpifort.a, libmpifort.so.
+
+
+
+################## pnetcdf #######################
+
+  Now type 'make' to build the library and utility tools.
+   Type 'make [<target>]'
+       where the optional <target> is:
+           testing          - test PnetCDF build for sequential run
+           ptest            - test PnetCDF build for parallel run
+           install          - install PnetCDF
+
+
+module purge
+module load intel/16.0.3
+module load impi/5.1.3.210
+./configure  \
+  --prefix=/curc/sw/pnetcdf/1.7.0/impi/5.1.3.210/intel/16.0.3 \
+  CFLAGS="-g -O2 -fPIC" \
+  CXXFLAGS="-g -O2 -fPIC" \
+  FFLAGS="-g -O2 -fPIC" \
+  FCFLAGS="-g -O2 -fPIC" \
+  F90FLAGS="-g -O2 -fPIC"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+module purge
+module load intel/16.0.3
+module load openmpi/1.10.2
+./configure  \
+  --prefix=/curc/sw/pnetcdf/1.7.0/openmpi/1.10.2/intel/16.0.3 \
+  CFLAGS="-g -O2 -fPIC" \
+  CXXFLAGS="-g -O2 -fPIC" \
+  FFLAGS="-g -O2 -fPIC" \
+  FCFLAGS="-g -O2 -fPIC" \
+  F90FLAGS="-g -O2 -fPIC"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+
+module purge
+module load gcc/6.1.0
+module load impi/5.1.3.210
+./configure  \
+  --prefix=/curc/sw/pnetcdf/1.7.0/impi/5.1.3.210/gcc/6.1.0 \
+  CFLAGS="-g -O2 -fPIC" \
+  CXXFLAGS="-g -O2 -fPIC" \
+  FFLAGS="-g -O2 -fPIC" \
+  FCFLAGS="-g -O2 -fPIC" \
+  F90FLAGS="-g -O2 -fPIC"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+module purge
+module load gcc/6.1.0
+module load openmpi/1.10.2
+./configure  \
+  --prefix=/curc/sw/pnetcdf/1.7.0/openmpi/1.10.2/gcc/6.1.0 \
+  CFLAGS="-g -O2 -fPIC" \
+  CXXFLAGS="-g -O2 -fPIC" \
+  FFLAGS="-g -O2 -fPIC" \
+  FCFLAGS="-g -O2 -fPIC" \
+  F90FLAGS="-g -O2 -fPIC"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+module purge
+module load pgi/16.5
+module load openmpi/1.10.2
+./configure  \
+  --prefix=/curc/sw/pnetcdf/1.7.0/openmpi/1.10.2/pgi/16.5 \
+  CFLAGS="-g -O2 -fPIC" \
+  CXXFLAGS="-g -O2 -fPIC" \
+  FFLAGS="-g -O2 -fPIC" \
+  FCFLAGS="-g -O2 -fPIC" \
+  F90FLAGS="-g -O2 -fPIC"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+
+
+### netcdf with --enable-pnetcdf ####
+
+module purge
+ml gcc/6.1.0
+ml openmpi/1.10.2
+ml szip/2.1
+ml hdf5/1.10.0
+ml zlib/1.2.8
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/openmpi/1.10.2/gcc/6.1.0 \
+  --enable-mmap \
+  --enable-pnetcdf \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/openmpi/1.10.2/gcc/6.1.0/lib" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/openmpi/1.10.2/gcc/6.1.0/include"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+
+module purge
+ml gcc/6.1.0
+ml impi/5.1.3.210
+ml szip/2.1
+ml hdf5/1.10.0
+ml zlib/1.2.8
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/impi/5.1.3.210/gcc/6.1.0 \
+  --enable-mmap \
+  --enable-pnetcdf \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0/lib" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0/include"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+module purge
+ml intel/16.0.3
+ml impi/5.1.3.210
+ml szip/2.1
+ml hdf5/1.10.0
+ml zlib/1.2.8
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/impi/5.1.3.210/intel/16.0.3 \
+  --enable-mmap \
+  --enable-pnetcdf \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3/lib" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3/include"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+module purge
+ml intel/16.0.3
+ml openmpi/1.10.2
+ml szip/2.1
+ml hdf5/1.10.0
+ml zlib/1.2.8
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/openmpi/1.10.2/intel/16.0.3 \
+  --enable-mmap \
+  --enable-pnetcdf \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3/lib" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3/include"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+module purge
+ml pgi/16.5
+ml openmpi/1.10.2
+ml szip/2.1
+ml hdf5/1.10.0
+ml zlib/1.2.8
+../netcdf-4.4.0/configure  \
+  --prefix=/curc/sw/netcdf/4.4.0/openmpi/1.10.2/pgi/16.5 \
+  --enable-mmap \
+  --enable-pnetcdf \
+  LDFLAGS="-L/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5/lib" \
+  CPPFLAGS="-I/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5/include"
+make -j14
+make install
+curcb -i
+curcb
+make clean
+
+
+
+###### tdom #############
+ml purge
+ml tcltk/8.6.5
+./configure --prefix=/curc/sw/tdom/0.8.3 \
+--enable-shared \
+--with-tcl=/curc/sw/tcltk/8.6.5/lib \
+--with-tclinclude= /curc/sw/tcltk/8.6.5/include
+make  ## FAILED
+make test
+make install
+curcb -i
+curcb
+
+
+####### cube ##############
+## 4.3.4
+ml purge
+ml qt/5.6.0
+ml jdk/1.8.0
+ml papi/5.4.3
+./configure --prefix=/curc/sw/cube/4.3.4 \
+ -with-java-reader
+
+make
+make install
+curcb -i
+curcb
+
+## 3.4.3
+ml purge
+ml qt/4.8.5
+ml jdk/1.7.0
+ml papi/5.4.3
+./configure --prefix=/curc/sw/cube/3.4.3 \
+--enable-shared \
+--with-qmake=/curc/sw/qt/4.8.5/bin/qmake
+make
+make install
+curcb -i
+curcb
+
+
+##### jdk 1.7 ############
+download, checksum, unpack. That's it.
+
+##### tdom ############
+ml purge
+ml tcltk/8.6.5
+./configure --prefix=/curc/sw/tdom/0.8.3 \
+--with-tcl=/curc/sw/tcltk/8.6.5/lib \
+--with-tclinclude=/curc/sw/tcltk/8.6.5/include \
+CPPFLAGS="-DUSE_INTERP_ERRORLINE"  #Stops gcc from using deprecated feature
+
+##### Perfsuite ##########
+old one:
+./configure --prefix=/curc/tools/x86_64/rh6/software/perfsuite/1.1.4/impi/5.0.3.048/intel/15.0.2 --with-mpi --without-libbfd --with-papi=/curc/tools/x86_64/rh6/software/papi/5.4.1 LDFLAGS=-L/curc/tools/x86_64/rh6/software/expat/2.1.0/lib CFLAGS=-I/curc/tools/x86_64/rh6/software/expat/2.1.0/include --enable-java
+
+
+Make sure to load tcltk, cube, papi, jdk in modulefile
+Use jdk7, jdk8 will break make with doclint stuff.
+
+ml purge
+ml expat/2.1.1
+ml jdk/1.7.0
+ml papi/5.4.3
+ml cube/3.4.3
+ml tcltk/8.6.5
+ml tdom/0.8.3
+ml intel/16.0.3
+ml impi/5.1.3.210
+./configure --prefix=/curc/sw/perfsuite/1.1.4/impi/5.1.3.210/intel/16.0.3 \
+ --without-libbfd \
+ --enable-debug \
+ --with-mpi \
+ --with-papi=/curc/sw/papi/5.4.3/ \
+ --enable-java \
+ --with-cube=/curc/sw/cube/3.4.3 \
+ --with-tdom=/curc/sw/tdom/0.8.3 \
+ CFLAGS="-I/curc/sw/expat/2.1.1/include" \
+ LDFLAGS="-L/curc/sw/expat/2.1.1/lib"
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+ml purge
+ml expat/2.1.1
+ml jdk/1.7.0
+ml papi/5.4.3
+ml cube/3.4.3
+ml tcltk/8.6.5
+ml tdom/0.8.3
+ml intel/16.0.3
+ml openmpi/1.10.2
+./configure --prefix=/curc/sw/perfsuite/1.1.4/openmpi/1.10.2/intel/16.0.3 \
+ --without-libbfd \
+ --enable-debug \
+ --with-mpi \
+ --with-papi=/curc/sw/papi/5.4.3/ \
+ --enable-java \
+ --with-cube=/curc/sw/cube/3.4.3 \
+ --with-tdom=/curc/sw/tdom/0.8.3 \
+ CFLAGS="-I/curc/sw/expat/2.1.1/include" \
+ LDFLAGS="-L/curc/sw/expat/2.1.1/lib"
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+
+ml purge
+ml expat/2.1.1
+ml jdk/1.7.0
+ml papi/5.4.3
+ml cube/3.4.3
+ml tcltk/8.6.5
+ml tdom/0.8.3
+ml gcc/6.1.0
+ml impi/5.1.3.210
+./configure --prefix=/curc/sw/perfsuite/1.1.4/impi/5.1.3.210/gcc/6.1.0 \
+ --without-libbfd \
+ --enable-debug \
+ --with-mpi \
+ --with-papi=/curc/sw/papi/5.4.3/ \
+ --enable-java \
+ --with-cube=/curc/sw/cube/3.4.3 \
+ --with-tdom=/curc/sw/tdom/0.8.3 \
+ CFLAGS="-I/curc/sw/expat/2.1.1/include" \
+ LDFLAGS="-L/curc/sw/expat/2.1.1/lib"
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+ml purge
+ml expat/2.1.1
+ml jdk/1.7.0
+ml papi/5.4.3
+ml cube/3.4.3
+ml tcltk/8.6.5
+ml tdom/0.8.3
+ml gcc/6.1.0
+ml openmpi/1.10.2
+./configure --prefix=/curc/sw/perfsuite/1.1.4/openmpi/1.10.2/gcc/6.1.0 \
+ --without-libbfd \
+ --enable-debug \
+ --with-mpi \
+ --with-papi=/curc/sw/papi/5.4.3/ \
+ --enable-java \
+ --with-cube=/curc/sw/cube/3.4.3 \
+ --with-tdom=/curc/sw/tdom/0.8.3 \
+ CFLAGS="-I/curc/sw/expat/2.1.1/include" \
+ LDFLAGS="-L/curc/sw/expat/2.1.1/lib"
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+
+ml purge
+ml expat/2.1.1
+ml jdk/1.7.0
+ml papi/5.4.3
+ml cube/3.4.3
+ml tcltk/8.6.5
+ml tdom/0.8.3
+ml pgi/16.5
+ml openmpi/1.10.2
+./configure --prefix=/curc/sw/perfsuite/1.1.4/openmpi/1.10.2/pgi/16.5 \
+ --without-libbfd \
+ --enable-debug \
+ --with-mpi \
+ --with-papi=/curc/sw/papi/5.4.3/ \
+ --enable-java \
+ --with-cube=/curc/sw/cube/3.4.3 \
+ --with-tdom=/curc/sw/tdom/0.8.3 \
+ CFLAGS="-I/curc/sw/expat/2.1.1/include" \
+ LDFLAGS="-L/curc/sw/expat/2.1.1/lib" \
+ F77=pgf77
+
+
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+
+
+
+
+########## Proj.4 ####################
+old:
+./configure --prefix=/curc/tools/x86_64/rh6/software/proj/4.9.2/intel/15.0.2 --without-jni
+
+ml purge
+ml gcc/6.1.0
+./configure --prefix=/curc/sw/proj/4.9.2/gcc/6.1.0 --without-jni
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+ml purge
+ml intel/16.0.3
+./configure --prefix=/curc/sw/proj/4.9.2/intel/16.0.3 --without-jni
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+ml purge
+ml pgi/16.5
+./configure --prefix=/curc/sw/proj/4.9.2/pgi/16.5 --without-jni
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+
+
+###### jpeg/9b #########
+
+ml purge
+ml gcc/6.1.0
+./configure --prefix=/curc/sw/jpeg/9b/gcc/6.1.0
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+ml purge
+ml intel/16.0.3
+./configure --prefix=/curc/sw/jpeg/9b/intel/16.0.3
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+ml purge
+ml pgi/16.5
+./configure --prefix=/curc/sw/jpeg/9b/pgi/16.5
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+
+#### ncl #####
+download and extract binary
+
+#### nco ####
+Didn't test as test files are several gb and gpfs isn't up yet
+
+module purge
+module load gcc/6.1.0
+module load szip/2.1
+module load hdf5/1.10.0
+module load gsl/2.1
+module load udunits/2.2.20
+module load netcdf/4.4.0
+module load antlr/2.7.7
+./configure --prefix=/curc/sw/nco/4.6.0/gcc/6.1.0 \
+ NETCDF_ROOT=/curc/sw/netcdf/4.4.0/gcc/6.1.0 \
+ UDUNITS2_PATH=/curc/sw/udunits/2.2.20 \
+ ANTLR_ROOT=/curc/sw/antlr/2.7.7/gcc/6.1.0
+make -j12
+make installcheck
+make install
+curcb -i
+make distclean
+curcb
+
+module purge
+module load intel/16.0.3
+module load szip/2.1
+module load hdf5/1.10.0
+module load gsl/2.1
+module load udunits/2.2.20
+module load netcdf/4.4.0
+module load antlr/2.7.7
+./configure --prefix=/curc/sw/nco/4.6.0/intel/16.0.3 \
+ NETCDF_ROOT=/curc/sw/netcdf/4.4.0/intel/16.0.3 \
+ UDUNITS2_PATH=/curc/sw/udunits/2.2.20 \
+ ANTLR_ROOT=/curc/sw/antlr/2.7.7/intel/16.0.3
+make -j12
+make installcheck
+make install
+curcb -i
+make distclean
+curcb
+
+
+
+##### ncview #######
+module purge
+module load gcc/6.1.0
+module load szip/2.1
+module load hdf5/1.10.0
+module load udunits/2.2.20
+module load netcdf/4.4.0
+./configure --prefix=/curc/sw/ncview/2.1.7/gcc/6.1.0 \
+ --with-udunits2_incdir=/curc/sw/udunits/2.2.20/include \
+ --with-udunits2_libdir=/curc/sw/udunits/2.2.20/lib
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+module purge
+module load intel/16.0.3
+module load szip/2.1
+module load hdf5/1.10.0
+module load udunits/2.2.20
+module load netcdf/4.4.0
+./configure --prefix=/curc/sw/ncview/2.1.7/intel/16.0.3 \
+ --with-udunits2_incdir=/curc/sw/udunits/2.2.20/include \
+ --with-udunits2_libdir=/curc/sw/udunits/2.2.20/lib
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+module purge
+module load pgi/16.5
+module load szip/2.1
+module load hdf5/1.10.0
+module load udunits/2.2.20
+module load netcdf/4.4.0
+./configure --prefix=/curc/sw/ncview/2.1.7/pgi/16.5 \
+ --with-udunits2_incdir=/curc/sw/udunits/2.2.20/include \
+ --with-udunits2_libdir=/curc/sw/udunits/2.2.20/lib
+make -j12
+make install
+curcb -i
+make distclean
+curcb
+
+
+######## pdtoolkit #############
+ml purge
+./configure -prefix=/curc/sw/pdtoolkit/3.22   # Only ONE "-" before prefix...
+make
+make install
+
+
+######### Scalasca ##############
+TIM B Install:
+./configure --prefix=/curc/tools/x86_64/rh6/software/scalasca/2.2.2/impi/5.0.3.048/intel/15.0.2 --with-nocross-compiler-suite=intel --with-mpi=intel3
+PATH: /curc/tools/x86_64/rh6/software/scorep/1.4.2/impi/5.0.3.048/intel/15.0.2/bin
+PATH: /curc/tools/x86_64/rh6/software/pdtoolkit/3.20/bin
+PATH: /curc/tools/x86_64/rh6/software/papi/5.4.1/bin
+PATH: /curc/tools/x86_64/rh6/software/impi/5.0.3.048/bin64
+PATH: /curc/slurm/slurm/current/bin
+PATH: /curc/tools/x86_64/rh6/software/intel/15.0.2/composer_xe_2015.2.164/bin/intel64
+
+
+ml purge
+ml intel/16.0.3
+ml impi/5.1.3.210
+ml zlib/1.2.8
+ml cube/4.3.4
+ml scorep/2.0.2
+./configure --prefix=/curc/sw/scalasca/2.3.1/impi/5.1.3.210/intel/16.0.3 \
+ --with-nocross-compiler-suite=intel \
+ --with-mpi=intel3 \
+ --with-libz=/curc/sw/zlib/1.2.8/intel/16.0.3 \
+ --with-cube=/curc/sw/cube/4.3.4/bin \
+ --enable-backend-test-runs
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+
+######### score-p ################
+TIM B Install:
+./configure --prefix=/curc/tools/x86_64/rh6/software/scorep/1.4.2/impi/5.0.3.048/intel/15.0.2/ --with-nocross-compiler-suite=intel --with-mpi=intel3 --with-pdt=/curc/tools/x86_64/rh6/software/pdtoolkit/3.20/x86_64/intel/15.0.2/bin/ --with-papi-header=/curc/tools/x86_64/rh6/software/papi/5.4.1/include --with-papi-lib=/curc/tools/x86_64/rh6/software/papi/5.4.1/lib --with-libpmi-include=/curc/slurm/slurm/current/include/slurm --with-libpmi-lib=/curc/slurm/slurm/current/lib
+
+ml purge
+ml intel/16.0.3
+ml impi/5.1.3.210
+ml papi/5.4.3
+ml pdtoolkit/3.22
+ml cube/4.3.4
+ml cuda/7.5.18
+./configure --prefix=/curc/sw/scorep/2.0.2/impi/5.1.3.210/intel/16.0.3 \
+--with-nocross-compiler-suite=intel \
+--with-mpi=intel3 \
+--with-cube=/curc/sw/cube/4.3.4/bin \
+--with-papi-header=/curc/sw/papi/5.4.3/include \
+--with-papi-lib=/curc/sw/papi/5.4.3/lib \
+--with-libcudart=/curc/sw/cuda/7.5.18
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+ml purge
+ml intel/16.0.3
+ml openmpi/1.10.2
+ml papi/5.4.3
+ml pdtoolkit/3.22
+ml cube/4.3.4
+ml cuda/7.5.18
+./configure --prefix=/curc/sw/scorep/2.0.2/openmpi/1.10.2/intel/16.0.3 \
+--with-nocross-compiler-suite=intel \
+--with-mpi=intel3 \
+--with-cube=/curc/sw/cube/4.3.4/bin \
+--with-papi-header=/curc/sw/papi/5.4.3/include \
+--with-papi-lib=/curc/sw/papi/5.4.3/lib \
+--with-libcudart=/curc/sw/cuda/7.5.18
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+
+
+######### vtf3 ################
+download binary, unpack...
+
+
+######### otf ###############
+ml purge
+ml intel/16.0.3
+ml zlib/1.2.8
+./configure --prefix=/curc/sw/otf/1.2.6/intel/16.0.3 \
+ --with-vtf3=/curc/sw/vtf3/1.43 \
+ --with-vtf3-lib-dir=/curc/sw/vtf3/1.43/x86_64/lib \
+ --with-vtf3-include-dir=/curc/sw/vtf3/1.43/include \
+ --with-zlib=/curc/sw/zlib/1.2.8/intel/16.0.3
+make -j12
+make check
+make install
+curcb -i
+make distclean
+curcb
+
+
+######### TAU 2.25.1 ###################
+
+Didn't do:
+ml cuda/7.5.18
+ -cuda=/curc/sw/cuda/7.5.18 \
+-opencl=<dir> ................ Specify location of the top level OpenCL SDK
+  Note: This option is needed when used with -cuda=<dir> option.
+
+Didn't Work:
+ml cube/4.3.4
+  -cube=/curc/sw/cube/4.3.4 \
+ml python/3.5.1
+ -pythonlib=/curc/sw/python/3.5.1/lib \
+ -pythoninc=/curc/sw/python/3.5.1/include \
+
+Note that the configure script actually copies a bunch of stuff to the -prefix directory. To reconfigure you should delete everything in that directory.
+
+
+ml purge
+ml intel/16.0.3
+ml impi/5.1.3.210
+ml papi/5.4.3
+ml vtf3/1.43
+ml otf/1.2.6
+ml jdk/1.8.0
+ml scalasca/2.3.1
+ml scorep/2.0.2
+./configure -prefix=/curc/sw/tau/2.25.1/impi/5.1.3.210/intel/16.0.3 \
+ -mpi \
+ -mpiinc=/curc/sw/intel/16.0.3/impi/5.1.3.210/include64 \
+ -mpilib=/curc/sw/intel/16.0.3/impi/5.1.3.210/lib64 \
+ -c++=icpc \
+ -cc=icc \
+ -fortran=ifort \
+ -openmp \
+ -papi=/curc/sw/papi/5.4.3 \
+ -jdk=/curc/sw/jdk/1.8.0 \
+ -scalasca=/curc/sw/scalasca/2.3.1/impi/5.1.3.210/intel/16.0.3 \
+ -scorep=/curc/sw/scorep/2.0.2/impi/5.1.3.210/intel/16.0.3 \
+ -vtf=/curc/sw/vtf3/1.43 \
+ -otf=/curc/sw/otf/1.2.6/intel/16.0.3 \
+ -useropt='-g -O2 -std=c++11' \
+ -bfd=download \
+ -unwind=download
+
+export PATH=$PATH:/curc/sw/tau/2.25.1/impi/5.1.3.210/intel/16.0.3/x86_64/bin
+make install
+
+ln link fail ./libTAU.jnilib file exists error. Remove the link that failed.
+rm /curc/sw/tau/2.25.1/impi/5.1.3.210/intel/16.0.3/x86_64/lib/libTAU.jnilib
+make install
+
+May need to add binutils and libunwind stuff to modulefile...
+
+
+
+############## QuantumEspresso ########################
+ml purge
+ml intel/16.0.3
+ml impi/5.1.3.210
+./configure --prefix=/curc/sw/impi/5.1.3.210/intel/16.0.3/ \
+  --enable-shared \
+  --enable-parallel \
+  --enable-openmp \
+  --with-scalapack=intel \
+  FC=mpiifort \
+  F77=mpif77 \
+  CC=mpicc
+
+
+######### NetCDF Fortran ######################
+ml purge
+ml intel
+ml impi
+ml netcdf
+./configure --prefix=/curc/sw/netcdf/4.4.0/impi/5.1.3.210/intel/16.0.3 \
+  --enable-shared \
+  CPPFLAGS="-I/curc/sw/netcdf/4.4.0/impi/5.1.3.210/intel/16.0.3/include" \
+####### Didn't include this line but maybe should have?
+#######  LDFLAGS=-L/curc/tools/x86_64/rh6/software/netcdf/4.3.3.1/impi/5.0.3.048/intel/15.0.2/lib
+
+ml purge
+ml intel
+ml openmpi
+ml netcdf
+./configure --prefix=/curc/sw/netcdf/4.4.0/openmpi/1.10.2/intel/16.0.3 \
+  --enable-shared \
+  CPPFLAGS="-I/curc/sw/netcdf/4.4.0/openmpi/1.10.2/intel/16.0.3/include" \
+  LDFLAGS=-L/curc/sw/netcdf/4.4.0/openmpi/1.10.2/intel/16.0.3/lib
