@@ -1,4 +1,4 @@
-Modules_2016a
+xfModules_2016a
 
 QT 5.6.0 had no config.log. Was installed with system compiler and no modules loaded:
 ./configure --prefix=/curc/sw/qt/5.6.0/
@@ -1648,13 +1648,64 @@ ml gcc openmpi boost python/3.5.2
 
 
 
-
 #################### OpenFOAM ######################################
 ml purge
 ml gcc
 ml openmpi
 export WM_PROJECT_DIR=/curc/tools/src/openfoam/4.0/OpenFOAM-4.x-version-4.0
 # No --prefix???????
+########################################
+ml purge
+ml gcc openmpi
+ml boost  ##Do I need this???
+ml qt/5.6.0 cmake paraview
+cd  ##Next command doesn't work everywhere for some reason...
+source /curc/tools/src/openfoam/4.0/OpenFOAM-4.0/etc/bashrc
+export WM_THIRD_PARTY_DIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0  #not sure if needed???
+# Move boost libraries to third party directory and rename it boost-system
+# Download and extract gmp mpfr and CGAL. rename them all to gmp-system, cgal-system, mpfr-system
+./Allwmake  (in third party)
+# Install opengl (freeglut-devel rpm)
+./makeParaView
+# Install flex/bison (manually or yum including devel pkgs)
+cd OpenFoam_4.0
+./Allwmake
+
+# Can't find config.h
+# Make CGAL.......
+# Make gmp
+ml gcc cmake autotools
+cd gmp-system
+./configure --prefix=$PWD
+make
+make install
+# Make mpfr
+./configure --prefix=$PWD \
+  --with-gmp=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/gmp-system/
+
+
+# Back to CGAL
+ml openmpi
+cmake . \
+  -DGMP_LIBRARIES=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/gmp-system/lib \
+  -DGMP_INCLUDE_DIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/gmp-system/include \
+  -DMPFR_LIBRARIES=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/lib \
+  -DMPFR_INCLUDE_DIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/include \
+  -DBOOST_INCLUDEDIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/boost-system/
+
+# Can't find gmp stuff
+export CPLUS_INCLUDE_PATH=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/cgal-system/include:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/gmp-system/include:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/include
+#Can't find -lCGAL -lmpfr
+###fail sauces...
+###export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/gmp-system/lib:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/lib:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/cgal-system/lib
+###shopt -s expand_aliases
+### alias ld =ld -L....""
+export LIBRARY_PATH=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/lib:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/cgal-system/lib
+./Allwmake
+### SUCCESSish!!
+
+
+
 
 ############# gnu_parallel #############################
 ml purge
