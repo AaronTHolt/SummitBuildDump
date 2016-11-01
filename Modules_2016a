@@ -1658,7 +1658,7 @@ export WM_PROJECT_DIR=/curc/tools/src/openfoam/4.0/OpenFOAM-4.x-version-4.0
 ml purge
 ml gcc openmpi
 ml boost  ##Do I need this???
-ml qt/5.6.0 cmake paraview
+ml qt/4 cmake
 cd  ##Next command doesn't work everywhere for some reason...
 source /curc/tools/src/openfoam/4.0/OpenFOAM-4.0/etc/bashrc
 export WM_THIRD_PARTY_DIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0  #not sure if needed???
@@ -1691,7 +1691,8 @@ cmake . \
   -DGMP_INCLUDE_DIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/gmp-system/include \
   -DMPFR_LIBRARIES=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/lib \
   -DMPFR_INCLUDE_DIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/include \
-  -DBOOST_INCLUDEDIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/boost-system/
+  -DBOOST_INCLUDEDIR=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/boost-system/include
+
 
 # Can't find gmp stuff
 export CPLUS_INCLUDE_PATH=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/cgal-system/include:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/gmp-system/include:/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/include
@@ -1704,7 +1705,139 @@ export LIBRARY_PATH=/curc/tools/src/openfoam/4.0/ThirdParty-4.0/mpfr-system/lib:
 ./Allwmake
 ### SUCCESSish!!
 
+############ Try 2 in official dir ################
+ml gcc openmpi cmake autotools qt/4.8.5 zlib
+source /curc/sw/openfoam/4.0/openmpi/1.10.2/gcc/6.1.0/OpenFOAM-4.0/etc/bashrc
+export TP_DIR=/curc/sw/openfoam/4.0/openmpi/1.10.2/gcc/6.1.0/ThirdParty-4.0
+cd $TP_DIR
+./Allwmake
+mkdir gmp-system
+mkdir mpfr-system
+mkdir boost-system
+mkdir cgal-system
+##GMP
+./configure --prefix=$TP_DIR/gmp-system/
+make
+make install
+##MPFR
+./configure --prefix=$TP_DIR/mpfr-system/ --with-gmp=$TP_DIR/gmp-system/
+make
+make install
+##CGAL
+cd cgal-system
+cmake ../CGAL-4.9 \
+  -DGMP_LIBRARIES=$TP_DIR/gmp-system/lib \
+  -DGMP_INCLUDE_DIR=$TP_DIR/gmp-system/include \
+  -DMPFR_LIBRARIES=$TP_DIR/mpfr-system/lib \
+  -DMPFR_INCLUDE_DIR=$TP_DIR/mpfr-system/include \
+  -DBOOST_INCLUDEDIR=$TP_DIR/boost-system/ \
+  -DCMAKE_INSTALL_PREFIX=$TP_DIR/cgal-system \
+  -DZLIB_INCLUDE_DIR=/curc/sw/zlib/1.2.8/gcc/6.1.0/include
+  #-DCMAKE_INSTALL_PREFIX=$TP_DIR/cgal-system \
+  #/curc/sw/boost/1.61.0/openmpi/1.10.2/gcc/6.1.0/include
+make
+make install
+./makeParaview
+wmRefresh
+export CPLUS_INCLUDE_PATH=$TP_DIR/cgal-system/include:$TP_DIR/gmp-system/include:$TP_DIR/mpfr-system/include
+export LIBRARY_PATH=$TP_DIR/mpfr-system/lib/:$TP_DIR/cgal-system/lib64
+./Allwmake  #-j12
 
+###################### OpenFOAM 4.1 - GCC/OpenMPI ################
+mv ThirdParty-4.x-version-4.1/ ThirdParty-4.1
+mv OpenFOAM-4.x-version-4.1/ OpenFOAM-4.1
+ml gcc openmpi cmake autotools qt/4.8.5 zlib
+source /curc/sw/openfoam/4.1/openmpi/1.10.2/gcc/6.1.0/OpenFOAM-4.1/etc/bashrc
+export ROOT_DIR=/curc/sw/openfoam/4.1/openmpi/1.10.2/gcc/6.1.0
+export TP_DIR=$ROOT_DIR/ThirdParty-4.1
+cd $TP_DIR
+mkdir gmp-system
+mkdir mpfr-system
+mkdir cgal-system
+tar -xf boost_1_61_0.tar.bz2
+mv boost_1_61_0 boost-system
+./Allwmake -j12
+cd boost-system
+./b2 install address-model=64 stage
+#### GMP, CGAL, MPFR should be downloaded and unpacked into ROOT_DIR
+##GMP
+./configure --prefix=$TP_DIR/gmp-system/
+make
+make install
+##MPFR
+./configure --prefix=$TP_DIR/mpfr-system/ --with-gmp=$TP_DIR/gmp-system/
+make
+make install
+##CGAL
+cd $ROOT_DIR
+mkdir cgal_build
+cd cgal_build
+cmake ../CGAL-4.9 \
+  -DGMP_LIBRARIES=$TP_DIR/gmp-system/lib \
+  -DGMP_INCLUDE_DIR=$TP_DIR/gmp-system/include \
+  -DMPFR_LIBRARIES=$TP_DIR/mpfr-system/lib \
+  -DMPFR_INCLUDE_DIR=$TP_DIR/mpfr-system/include \
+  -DBOOST_INCLUDEDIR=$TP_DIR/boost-system/ \
+  -DCMAKE_INSTALL_PREFIX=$TP_DIR/cgal-system \
+  -DZLIB_INCLUDE_DIR=$CURC_ZLIB_INC
+make -j12
+make install
+./makeParaView
+wmRefresh
+export CPLUS_INCLUDE_PATH=$TP_DIR/cgal-system/include:$TP_DIR/gmp-system/include:$TP_DIR/mpfr-system/include
+export LIBRARY_PATH=$TP_DIR/mpfr-system/lib/:$TP_DIR/cgal-system/lib64
+./Allwmake -j20
+
+
+##################### OpenFOAM 4.1 - Intel/IMPI ##################
+mv ThirdParty-4.x-version-4.1/ ThirdParty-4.1
+mv OpenFOAM-4.x-version-4.1/ OpenFOAM-4.1
+ml intel/16.0.3 impi zlib qt/4.8.5 cmake autotools
+vim /curc/sw/openfoam/4.1/impi/5.1.3.210/intel/16.0.3/OpenFOAM-4.1/etc/bashrc
+## Change these lines:
+  export WM_COMPILER=Icc
+  export WM_MPLIB=SYSTEMMPI
+source /curc/sw/openfoam/4.1/impi/5.1.3.210/intel/16.0.3/OpenFOAM-4.1/etc/bashrc
+export ROOT_DIR=/curc/sw/openfoam/4.1/impi/5.1.3.210/intel/16.0.3
+export TP_DIR=$ROOT_DIR/ThirdParty-4.1
+cd $TP_DIR
+tar -xf boost_1_61_0.tar.bz2
+mv boost_1_61_0 boost-system
+mkdir gmp-system
+mkdir mpfr-system
+mkdir cgal-system
+./Allwmake -j12
+cd boost-system
+./b2 install address-model=64 toolset=intel stage
+#### GMP, CGAL, MPFR should be downloaded and unpacked into ROOT_DIR
+##GMP
+./configure --prefix=$TP_DIR/gmp-system/
+make
+make install
+##MPFR
+./configure --prefix=$TP_DIR/mpfr-system/ --with-gmp=$TP_DIR/gmp-system/
+make
+make install
+##CGAL
+cd $ROOT_DIR
+mkdir cgal_build
+cd cgal_build
+cmake ../CGAL-4.9 \
+  -DGMP_LIBRARIES=$TP_DIR/gmp-system/lib \
+  -DGMP_INCLUDE_DIR=$TP_DIR/gmp-system/include \
+  -DMPFR_LIBRARIES=$TP_DIR/mpfr-system/lib \
+  -DMPFR_INCLUDE_DIR=$TP_DIR/mpfr-system/include \
+  -DBOOST_INCLUDEDIR=$TP_DIR/boost-system/ \
+  -DBOOST_LIBRARYDIR=$TP_DIR/boost-system/libs \
+  -DCMAKE_INSTALL_PREFIX=$TP_DIR/cgal-system \
+  -DZLIB_INCLUDE_DIR=$CURC_ZLIB_INC
+  ###-DBoost_DEBUG=ON
+make -j12
+make install
+./makeParaView
+wmRefresh
+export CPLUS_INCLUDE_PATH=$TP_DIR/cgal-system/include:$TP_DIR/gmp-system/include:$TP_DIR/mpfr-system/include:/curc/sw/intel/16.0.3/impi/5.1.3.210/include64/
+export LIBRARY_PATH=$TP_DIR/mpfr-system/lib/:$TP_DIR/cgal-system/lib64
 
 
 ############# gnu_parallel #############################
