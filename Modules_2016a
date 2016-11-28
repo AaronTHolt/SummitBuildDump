@@ -112,13 +112,27 @@ module purge
 module load intel/16.0.3
 module load zlib/1.2.8
 module load szip/2.1
- ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/intel/16.0.3 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 --with-default-plugindir=/curc/sw/hdf5/1.10.0/intel/16.0.3/lib/plugin --with-zlib=/curc/sw/zlib/1.2.8/intel/16.0.3 LD=/curc/tools/src/ld_wrapper.sh
+ ../hdf5-1.10.0-patch1/configure \
+ --prefix=/curc/sw/hdf5/1.10.0/intel/16.0.3 \
+ --enable-fortran \
+ --enable-direct-vfd \
+ --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 \
+ --with-default-plugindir=/curc/sw/hdf5/1.10.0/intel/16.0.3/lib/plugin \
+ --with-zlib=/curc/sw/zlib/1.2.8/intel/16.0.3 \
+ LD=/curc/tools/src/ld_wrapper.sh
 
 
 #hdf5 intel impi
 ml purge
 ml intel/16.0.3 impi/5.1.3.210 zlib/1.2.8 szip/2.1
- ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 --with-default-plugindir=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+ ../hdf5-1.10.0-patch1/configure \
+ --prefix=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3 \
+ --enable-fortran \
+ --enable-direct-vfd \
+ --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 \
+ --with-default-plugindir=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/intel/16.0.3/lib/plugin \
+ --enable-parallel \
+ LD=/curc/tools/src/ld_wrapper.sh
 
  ###/curc/sw/modules/mdep/impi/5.1.3.210/intel/16.0.3/hdf5/1.10.0.lua
 
@@ -1957,3 +1971,8 @@ or wherever the path in the lua file points to.
 #################### TotalView 2016.06.21 #############
 ./Install -help
 ./Install -agree -directory /curc/sw/ -nosymlink -platform linux-x86-64
+
+
+################# MatLab (is the devil) R2016b #######
+chown directories to your user so you can use x forwarding
+./install -downloadFolder "/curc/tools/src/matlab/R2016b"
