@@ -1802,6 +1802,56 @@ export CPLUS_INCLUDE_PATH=$TP_DIR/cgal-system/include:$TP_DIR/gmp-system/include
 export LIBRARY_PATH=$TP_DIR/mpfr-system/lib/:$TP_DIR/cgal-system/lib64
 ./Allwmake -j20
 
+###################### OpenFOAM 4.1 - GCC/OpenMPI with SCOTCH/metis ################
+mv ThirdParty-4.x-version-4.1/ ThirdParty-4.1
+mv OpenFOAM-4.x-version-4.1/ OpenFOAM-4.1
+ml gcc openmpi cmake autotools qt/4.8.5 zlib
+source /curc/sw/openfoam/4.1/openmpi/1.10.2/gcc/6.1.0/OpenFOAM-4.1/etc/bashrc
+export ROOT_DIR=/curc/sw/openfoam/4.1/openmpi/1.10.2/gcc/6.1.0
+export TP_DIR=$ROOT_DIR/ThirdParty-4.1
+cd $TP_DIR
+mkdir gmp-system
+mkdir mpfr-system
+mkdir cgal-system
+mkdir scotch-system
+tar -xf boost_1_61_0.tar.bz2
+mv boost_1_61_0 boost-system
+cd scotch_6.0.3
+make scotch
+make ptscotch
+#Download metis, unpack, and move to ThidParty-4.1
+./Allwmake -j12
+cd boost-system
+./b2 install address-model=64 stage
+#### GMP, CGAL, MPFR should be downloaded and unpacked into ROOT_DIR
+##GMP
+./configure --prefix=$TP_DIR/gmp-system/
+make
+make install
+##MPFR
+./configure --prefix=$TP_DIR/mpfr-system/ --with-gmp=$TP_DIR/gmp-system/
+make
+make install
+##CGAL
+cd $ROOT_DIR
+mkdir cgal_build
+cd cgal_build
+cmake ../CGAL-4.9 \
+  -DGMP_LIBRARIES=$TP_DIR/gmp-system/lib \
+  -DGMP_INCLUDE_DIR=$TP_DIR/gmp-system/include \
+  -DMPFR_LIBRARIES=$TP_DIR/mpfr-system/lib \
+  -DMPFR_INCLUDE_DIR=$TP_DIR/mpfr-system/include \
+  -DBOOST_INCLUDEDIR=$TP_DIR/boost-system/ \
+  -DCMAKE_INSTALL_PREFIX=$TP_DIR/cgal-system \
+  -DZLIB_INCLUDE_DIR=$CURC_ZLIB_INC
+make -j12
+make install
+./makeParaView
+wmRefresh
+export CPLUS_INCLUDE_PATH=$TP_DIR/cgal-system/include:$TP_DIR/gmp-system/include:$TP_DIR/mpfr-system/include
+export LIBRARY_PATH=$TP_DIR/mpfr-system/lib/:$TP_DIR/cgal-system/lib64
+./Allwmake -j20
+
 
 ##################### OpenFOAM 4.1 - Intel/IMPI ##################
 mv ThirdParty-4.x-version-4.1/ ThirdParty-4.1
@@ -1863,6 +1913,13 @@ mkdir cgal-system
 cd boost-system
 ./b2 install address-model=64 toolset=intel stage
 cd ..
+
+cd scotch_6.0.3/src
+make scotch
+make ptscotch
+
+#copy and extract metis to ThirdParty
+
 ./Allwmake -j12
 
 #### GMP, CGAL, MPFR should be downloaded and unpacked into ROOT_DIR
