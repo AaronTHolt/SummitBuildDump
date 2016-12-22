@@ -159,7 +159,20 @@ ml pgi/16.5 openmpi/1.10.2 zlib/1.2.8 szip/2.1
 ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/pgi/16.5 --with-default-plugindir=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
 
 ###########openmpi intel
-../openmpi-1.10.2/configure --prefix=/curc/sw/openmpi/1.10.2/intel/16.0.3 --enable-sensors --enable-wrapper-rpath --enable-static --with-threads=posix --enable-mpi-thread-multiple --enable-mpi-ext=all --with-verbs=/usr --with-slurm --with-pmi=/usr --with-psm2=/usr --with-cuda=/curc/sw/cuda/7.5.18 --enable-oshmem
+../openmpi-1.10.2/configure \
+--prefix=/curc/sw/openmpi/1.10.2/intel/16.0.3 \
+--enable-sensors \
+--enable-wrapper-rpath \
+--enable-static \
+--with-threads=posix \
+--enable-mpi-thread-multiple \
+--enable-mpi-ext=all \
+--with-verbs=/usr \
+--with-slurm \
+--with-pmi=/usr \
+--with-psm2=/usr \
+--with-cuda=/curc/sw/cuda/7.5.18 \
+--enable-oshmem
 
 
 ###########perl 5.22
@@ -1816,7 +1829,7 @@ mkdir cgal-system
 mkdir scotch-system
 tar -xf boost_1_61_0.tar.bz2
 mv boost_1_61_0 boost-system
-cd scotch_6.0.3
+cd scotch_6.0.3/src
 make scotch
 make ptscotch
 #Download metis, unpack, and move to ThidParty-4.1
@@ -2033,3 +2046,16 @@ or wherever the path in the lua file points to.
 ################# MatLab (is the devil) R2016b #######
 chown directories to your user so you can use x forwarding
 ./install -downloadFolder "/curc/tools/src/matlab/R2016b"
+
+
+
+################# Loadbalancer ##########################
+# Needs to run without a compiler/mpi loaded
+./configure --prefix=/curc/tools/x86_64/rh6/software/loadbalance/0.1 \
+CFLAGS=-static-intel \
+LDFLAGS="-Wl,-rpath,/curc/tools/x86_64/rh6/software/impi/5.0.3.048/intel64/lib/ -L/curc/tools/x86_64/rh6/software/impi/5.0.3.048/intel64/lib/ -lmpifort -lmpi"
+
+./configure --prefix=/curc/sw/loadbalance/0.1 \
+CFLAGS="-static-intel -I/curc/sw/intel/16.0.3/impi/5.1.3.210/include64/ -I/curc/sw/intel/16.0.3/include" \
+LD=/curc/tools/src/ld_wrapper.sh \
+LDFLAGS="-Wl,-rpath,/curc/sw/intel/16.0.3/impi/5.1.3.210/lib64 -L/curc/sw/intel/16.0.3/impi/5.1.3.210/lib64 -Wl,-rpath,/curc/sw/intel/16.0.3/compilers_and_libraries_2016.3.210/linux/compiler/lib/intel64 -L/curc/sw/intel/16.0.3/compilers_and_libraries_2016.3.210/linux/compiler/lib/intel64 -lmpifort -lmpi"
