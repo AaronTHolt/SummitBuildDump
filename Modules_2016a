@@ -175,9 +175,9 @@ ml pgi/16.5 openmpi/1.10.2 zlib/1.2.8 szip/2.1
 --enable-oshmem
 
 
-###########perl 5.22
+###########perl 5.24
 ml purge
-./Configure -des -Dprefix=$HOME/localperl
+./Configure -des -Dprefix=/curc/sw/perl/5.24.0
 make test
 make install
 
