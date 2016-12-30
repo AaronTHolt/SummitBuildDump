@@ -176,6 +176,7 @@ ml pgi/16.5 openmpi/1.10.2 zlib/1.2.8 szip/2.1
 
 
 ###########perl 5.24
+#Don't use old build directory. Perl saves your previous config. Untar a new one.
 ml purge
 ./Configure -des -Dprefix=/curc/sw/perl/5.24.0
 make test
