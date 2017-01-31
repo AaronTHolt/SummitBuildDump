@@ -6,7 +6,17 @@ make
 make install
 
 QT 4.8.5
-./configure    --prefix=/curc/sw/qt/4.8.5   -opensource   -confirm-license   -nomake   examples   -nomake   tests   -qt-zlib   -qt-libpng   -qt-libjpeg   -qt-freetype   -optimized-qmake   -no-dbus
+./configure --prefix=/curc/sw/qt/4.8.5 \
+ -opensource \
+ -confirm-license \
+ -nomake examples \
+ -nomake tests \
+ -qt-zlib \
+ -qt-libpng \
+ -qt-libjpeg \
+ -qt-freetype \
+ -optimized-qmake \
+ -no-dbus
 
 
 Paraview is a binary and was just moved to the correct directory.
@@ -139,12 +149,27 @@ ml intel/16.0.3 impi/5.1.3.210 zlib/1.2.8 szip/2.1
 #hdf5 intel openmpi
 ml purge
 ml intel/16.0.3 openmpi/1.10.2 zlib/1.2.8 szip/2.1
- ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 --with-default-plugindir=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+ ../hdf5-1.10.0-patch1/configure \
+ --prefix=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3 \
+ --enable-fortran \
+ --enable-direct-vfd \
+ --with-szlib=/curc/sw/szip/2.1/intel/16.0.3 \
+ --with-default-plugindir=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/intel/16.0.3/lib/plugin \
+ --enable-parallel \
+ LD=/curc/tools/src/ld_wrapper.sh
 ###/curc/sw/modules/mdep/openmpi/1.10.2/intel/16.0.3/hdf5/1.10.0.lua
 
 
 #hdf5 gcc impi
- ../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/gcc/6.1.0 --with-default-plugindir=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+ ../hdf5-1.10.0-patch1/configure \
+ --prefix=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0 \
+ --enable-fortran \
+ --enable-direct-vfd \
+ --with-szlib=/curc/sw/szip/2.1/gcc/6.1.0 \
+ --with-default-plugindir=/curc/sw/hdf5/1.10.0/impi/5.1.3.210/gcc/6.1.0/lib/plugin \
+ --enable-parallel \
+ LD=/curc/tools/src/ld_wrapper.sh
+
 PATH: /curc/sw/intel/16.0.3/impi/5.1.3.210/bin64
 PATH: /curc/sw/gcc/6.1.0/bin
 PATH: /usr/local/bin
@@ -156,7 +181,14 @@ PATH: /usr/sbin
  #hdf5 pgi openmpi
 ml purge
 ml pgi/16.5 openmpi/1.10.2 zlib/1.2.8 szip/2.1
-../hdf5-1.10.0-patch1/configure --prefix=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5 --enable-fortran --enable-direct-vfd --with-szlib=/curc/sw/szip/2.1/pgi/16.5 --with-default-plugindir=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5/lib/plugin --enable-parallel LD=/curc/tools/src/ld_wrapper.sh
+../hdf5-1.10.0-patch1/configure \
+--prefix=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5 \
+--enable-fortran \
+--enable-direct-vfd \
+--with-szlib=/curc/sw/szip/2.1/pgi/16.5 \
+--with-default-plugindir=/curc/sw/hdf5/1.10.0/openmpi/1.10.2/pgi/16.5/lib/plugin \
+--enable-parallel \
+LD=/curc/tools/src/ld_wrapper.sh
 
 ###########openmpi intel
 ../openmpi-1.10.2/configure \
@@ -1619,6 +1651,9 @@ $ ./configure --prefix=/curc/sw/loadbalance/0.1
 CFLAGS=-static-intel LDFLAGS=-Wl,-rpath,/curc/sw/intel/16.0.3/impi/5.1.3.210/lib64/
 -L/curc/sw/intel/16.0.3/impi/5.1.3.210/lib64/ -lmpifort -lmpi
 
+## Might need this in module:
+export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+
 
 ################ boost ########################
 ml purge
@@ -2005,6 +2040,73 @@ src > make yes-user-omp
 src > make hybrid
 src > mpirun -np 4 lmp_hybrid -sf omp < ../examples/melt/in.melt
 
+##### Take 2 with gcc/openmpi  ################
+Currently Loaded Modules:
+1) gcc/6.1.0        3) jpeg/9b         5) fftw/3.3.4
+2) openmpi/1.10.2   4) python/2.7.11   6) cuda/7.5.18
+
+### Serial changes
+
+# Makefile
+CC =        g++
+CCFLAGS =   -g -O3 -I/curc/sw/fftw/3.3.4/openmpi/1.10.2/gcc/6.1.0/include -I/curc/sw/python/2.7.11/include/python2.7 -I/curc/sw/jpeg/9b/gcc/6.1.0/include
+SHFLAGS =   -fPIC
+DEPFLAGS =  -M
+LINK =      g++
+LINKFLAGS = -g -O -L/curc/sw/fftw/3.3.4/openmpi/1.10.2/gcc/6.1.0/lib -L/curc/sw/jpeg/9b/gcc/6.1.0/lib
+LIB =
+SIZE =      size
+ARCHIVE =   ar
+ARFLAGS =   -rc
+SHLIBFLAGS =    -shared
+
+LMP_INC =   -DLAMMPS_GZIP -DLAMMPS_JPEG -DLAMMPS_MEMALIGN=64
+
+MPI_INC =       -I../STUBS
+MPI_PATH =      -L../STUBS
+MPI_LIB =   -lmpi_stubs
+
+FFT_INC =       -DFFT_FFTW3 -DFFT_SINGLE
+FFT_PATH =
+FFT_LIB =   -lfftw3f
+
+JPG_LIB =   -ljpeg
+
+
+# Libraries
+make yes-asphere yes-body yes-class2 yes-colloid yes-compress yes-coreshell \
+yes-dipole yes-gpu yes-granular yes-kspace yes-manybody yes-python\
+yes-mc yes-meam yes-misc yes-molecule  yes-opt yes-peri yes-poems \
+yes-qeq yes-reax yes-replica yes-rigid yes-shock yes-snap yes-srd yes-voronoi
+
+## problem packages:  yes-gpu(gcc versions later than 4.9 not supported)
+## yes-kim(download...) yes-kokkos(download...) yes-mpiio(for serial/openmp) yes-python(we have intel python...)
+
+# Make side libs
+cd lib/reax
+make -f Makefile.gfortran
+cd lib/meam
+make -f Makefile.gfortran
+cd lib/poems
+make -f Makefile.g++
+
+cd lib/voronoi
+wget http://math.lbl.gov/voro++/download/dir/voro++-0.4.6.tar.gz
+tar -xf voro++-0.4.6.tar.gz
+cd voro++-0.4.6
+make
+cd ..
+ln -s voro++-0.4.6/src includelink
+ln -s voro++-0.4.6/src liblink
+
+# Testing
+../../src/lmp_serial < in.melt
+../../src/lmp_omp -sf omp < in.melt
+mpirun -np 4 ../../src/lmp_mpi < in.melt
+mpirun -np 4 ../../src/lmp_hybrid -sf omp < in.melt
+
+
+
 ############# LAMMPS INTEL/IMPI/MKL ############################
 Similar to LAMMPS GCC/OPENMPI/FFTW3. Need -restrict with icc for it to compile
 ## Openmp/Serial
@@ -2023,12 +2125,86 @@ FFT_INC =       -DFFT_FFTW3 -DFFT_SINGLE
 FFT_LIB =   -lfftw3f
 
 
+##### Take 2 ################################
+Currently Loaded Modules:
+  1) intel/16.0.3 (m)   2) jpeg/9b   3) python/2.7.11   4) mkl/11.3.3 (m)   5) impi/5.1.3.210
+
+#serial makefile#
+CC =        icpc
+CCFLAGS =   -O3 -restrict -I/curc/sw/intel/16.0.3/mkl/include -I/curc/sw/python/2.7.11/include/python2.7 -I/curc/sw/jpeg/9b/gcc/6.1.0/include
+SHFLAGS =   -fPIC
+DEPFLAGS =  -M
+
+LINK =      icpc
+LINKFLAGS = -O3 -L/curc/sw/python/2.7.11/lib -L/curc/sw/intel/16.0.3/mkl/lib/intel64 -L/curc/sw/jpeg/9b/gcc/6.1.0/lib
+LIB = -lpython2.7
+SIZE =      size
+
+ARCHIVE =   ar
+ARFLAGS =   -rc
+SHLIBFLAGS =    -shared
+
+MPI_INC =       -I../STUBS
+MPI_PATH =      -L../STUBS
+MPI_LIB =   -lmpi_stubs
+
+LMP_INC =   -DLAMMPS_GZIP -DLAMMPS_JPEG -DLAMMPS_MEMALIGN=64
+
+FFT_INC =       -DFFT_MKL
+FFT_PATH =
+FFT_LIB =  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lstdc++
+
+JPG_INC =
+JPG_PATH =
+JPG_LIB =  -ljpeg
+#end serial makefile#
+
+# Libraries
+make yes-asphere yes-body yes-class2 yes-colloid yes-compress yes-coreshell \
+yes-dipole yes-granular yes-kspace yes-manybody yes-python \
+yes-mc yes-meam yes-misc yes-molecule  yes-opt yes-peri yes-poems \
+yes-qeq yes-reax yes-replica yes-rigid yes-shock yes-snap yes-srd yes-voronoi
+
+## problem packages:  yes-gpu(cuda version not supported)
+## yes-kim(download...) yes-kokkos(download...) yes-mpiio(for serial/openmp)
+
+# Make side libs
+cd lib/reax
+make -f Makefile.ifort
+cd lib/meam
+vim Makefile.lammps.ifort  #change lompstub to liomp5
+make -f Makefile.ifort
+cd lib/poems
+make -f Makefile.icc
+
+cd lib/voronoi
+wget http://math.lbl.gov/voro++/download/dir/voro++-0.4.6.tar.gz
+tar -xf voro++-0.4.6.tar.gz
+cd voro++-0.4.6
+make
+cd ..
+ln -s voro++-0.4.6/src includelink
+ln -s voro++-0.4.6/src liblink
+
+# gpu stuff on gpunode...  ### OUR CUDA IS INCOMPATIBLE ####
+ssh sgpu0101
+cd lib/gpu
+vim Makefile.linux ##Change cuda home, mpic++ to mpicxx
+make -f Makefile.linux
+
+# Testing
+../../src/lmp_serial < in.melt
+../../src/lmp_omp -sf omp < in.melt
+mpirun -np 4 ../../src/lmp_mpi < in.melt
+mpirun -np 4 ../../src/lmp_hybrid -sf omp < in.melt
+
+
 
 
 
 
 ############### Intel parallel studio 2017  ###########
-# Your serial number for this product is C9TX-ZGJGWT7H. Save this number,
+# Your serial number for this product is ####-########. Save this number,
 since you will need it to install the software.
 # Make sure to change default installation path
 # use non-root install
